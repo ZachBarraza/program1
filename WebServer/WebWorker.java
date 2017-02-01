@@ -186,6 +186,10 @@ private String fileToString(){
        }
        in.close();
    } catch (IOException e) {}
+   
+   Date date = new Date();
+   content = content.replaceAll("<cs371date>",date.toString());
+   //str = str.replaceAll("<cs371server>", );
   return content;
 }//end method
 
