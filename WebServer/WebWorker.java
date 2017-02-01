@@ -1,3 +1,7 @@
+//Zachary Barraza
+//January 31st, 2017
+//CS 371 - Program 1
+
 /**
 * Web worker: an object of this class executes in its own new thread
 * to receive and respond to a single HTTP request. After the constructor
@@ -23,15 +27,24 @@
 import java.net.Socket;
 import java.lang.Runnable;
 import java.io.*;
-import java.nio.file.*;
 import java.util.Date;
 import java.text.DateFormat;
 import java.util.TimeZone;
+import java.nio.file.*; //Added this library
 
 public class WebWorker implements Runnable
 {
 
 private Socket socket;
+
+/*
+Added these global variables to work with the html files. The path 
+name to the file will be stored in path. fileExists will be the 
+deciding boolean variable that chooses whether or not the server
+will return a 404, or the file. Finally, the html string will hold 
+the html file to be converted in to bytes.
+*/
+
 private String path = "";
 private boolean fileExists;
 private String html = "";
@@ -57,11 +70,10 @@ public void run()
       InputStream  is = socket.getInputStream();
       OutputStream os = socket.getOutputStream();
       readHTTPRequest(is);
-      checkFile();
-      html = fileToString();
+      checkFile(); //Checks to see if the file exists, and sets a boolean flag
+      html = fileToString(); //Stores possible html file into a String
       writeHTTPHeader(os,"text/html");
-
-	writeContent(os);
+      writeContent(os);
       os.flush();
       socket.close();
    } catch (Exception e) {
@@ -82,6 +94,9 @@ private void readHTTPRequest(InputStream is)
       try {
          while (!r.ready()) Thread.sleep(1);
          line = r.readLine();
+         /*
+         This if statement intializes the path to be sent to the server
+         */
          if (path == ""){
 	    path = line.substring(5,line.indexOf("H"));
 	    path = path.replaceAll("\\s+", "");
@@ -104,7 +119,7 @@ private void readHTTPRequest(InputStream is)
 **/
 private void writeHTTPHeader(OutputStream os, String contentType) throws Exception
 {
-   if(!fileExists){
+   if(fileExists){
 	os.write("HTTP/1.1 200 OK\n".getBytes());
    }
    else{
@@ -134,23 +149,32 @@ private void writeHTTPHeader(OutputStream os, String contentType) throws Excepti
 **/
 private void writeContent(OutputStream os) throws Exception
 {
+	/*
+	This statement evaluates whether or not the requested file
+	exists or not. If it does not, it will write the 404 error,
+	if it does, it will write that.
+	*/
 	if (fileExists == false){
-	os.write("<html><head></head><body>\n".getBytes());
-  	 os.write("<h3>404 Error Page Not Found</h3>\n".getBytes());
-   	os.write("</body></html>\n".getBytes());
+	  os.write("<html><head></head><body>\n".getBytes());
+	  os.write("<h3>404 Error Page Not Found</h3>\n".getBytes());
+	  os.write("</body></html>\n".getBytes());
 	}
 	else{
-   os.write(html.getBytes());
-}
+	  os.write(html.getBytes());
+	}
 }
 
-
+//Method to see if the requested file exists.
 
 private void checkFile(){
 	File varTmpDir = new File(path);
 	fileExists = varTmpDir.exists();
-	System.out.println("fileExists = " + fileExists);
-}
+}//end method
+
+//Method that 
+
+//Method to convert html file contents to string that will be converted
+//to bytes later.
 
 private String fileToString(){
 	String content = "";
@@ -161,10 +185,8 @@ private String fileToString(){
            content +=str;
        }
        in.close();
-   } catch (IOException e) {
-
-   }
-	return content;
-}
+   } catch (IOException e) {}
+  return content;
+}//end method
 
 } // end class
